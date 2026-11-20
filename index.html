@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snow → Sun</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border-radius: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 600;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    main {
+      width: 100%;
+      max-width: 360px;
+      background: #ffffff;
+      border: 2px solid #e8e2da;
+    }
+
+    header {
+      background: linear-gradient(180deg, #a9e73d 0%, #6dc410 100%);
+      border-bottom: 2px solid #e8e2da;
+      padding: 16px 20px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 20px;
+      color: #ffffff;
+      -webkit-text-stroke: 1px #468c0a;
+      paint-order: stroke fill;
+      text-shadow:
+        -1px -1px 0 #468c0a,
+         1px -1px 0 #468c0a,
+        -1px  1px 0 #468c0a,
+         1px  1px 0 #468c0a;
+    }
+
+    .input-box {
+      padding: 20px;
+      background: #ffffff;
+      border-bottom: 2px solid #e8e2da;
+    }
+
+    .input-box label {
+      display: block;
+      font-size: 12px;
+      color: #824c24;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: 100%;
+      background: #faf8f4;
+      border: 2px solid #e8e2da;
+      color: #824c24;
+      font-size: 30px;
+      padding: 12px 14px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #824c24;
+    }
+
+    input::placeholder {
+      color: rgba(130, 76, 36, 0.35);
+    }
+
+    .output-box {
+      padding: 20px;
+      background: #ffffff;
+      color: #329623;
+    }
+
+    .output-box span {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    #sunOutput {
+      font-size: 50px;
+      line-height: 1;
+    }
+
+    #deltaOutput {
+      font-size: 14px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 2px solid #e8e2da;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Snow &rarr; Sun</h1>
+    </header>
+
+    <section class="input-box">
+      <label for="snowInput">Snow time</label>
+      <input id="snowInput" type="text" value="1:36.21" placeholder="1:36.21" autocomplete="off" spellcheck="false">
+    </section>
+
+    <section class="output-box">
+      <span>Sun time</span>
+      <div id="sunOutput">1:34.06</div>
+      <div id="deltaOutput">-2.15s</div>
+    </section>
+  </main>
+
+  <script>
+    const RATIO = 105.59 / 103.23;
+    const snowInput = document.getElementById('snowInput');
+    const sunOutput = document.getElementById('sunOutput');
+    const deltaOutput = document.getElementById('deltaOutput');
+
+    function parseSeconds(raw) {
+      const str = raw.trim().replace(/,/g, '.');
+      if (!str) return null;
+      const parts = str.split(':');
+      if (parts.length === 2) {
+        const m = Number(parts[0]);
+        const s = Number(parts[1]);
+        return isNaN(m) || isNaN(s) || m < 0 || s < 0 || s >= 60 ? null : m * 60 + s;
+      }
+      if (parts.length === 1) {
+        const s = Number(str);
+        return isNaN(s) || s <= 0 ? null : s;
+      }
+      return null;
+    }
+
+    function formatTime(total, sep) {
+      const rounded = Math.round(total * 100) / 100;
+      const mins = Math.floor(rounded / 60);
+      const secs = (rounded - mins * 60).toFixed(2).padStart(5, '0').replace('.', sep);
+      return `${mins}:${secs}`;
+    }
+
+    function update() {
+      const raw = snowInput.value;
+      const sep = raw.includes(',') && !raw.includes('.') ? ',' : '.';
+      const snowSec = parseSeconds(raw);
+
+      if (snowSec === null) {
+        sunOutput.textContent = `--:--${sep}--`;
+        deltaOutput.textContent = `--${sep}--s`;
+        return;
+      }
+
+      const sunSec = snowSec / RATIO;
+      const delta = (snowSec - sunSec).toFixed(2).replace('.', sep);
+
+      sunOutput.textContent = formatTime(sunSec, sep);
+      deltaOutput.textContent = `-${delta}s`;
+    }
+
+    snowInput.addEventListener('input', update);
+    update();
+  </script>
+</body>
+</html>
